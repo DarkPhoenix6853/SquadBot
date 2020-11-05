@@ -78,3 +78,16 @@
     * Format IDs into a ping message with reference to new voice channel
     * Send message
     * Remove squad from DB
+
+## Setup
+* Create the bot application (use on testing server first)
+    * Try to use actual permissions this time
+        * Read messages
+        * Read history
+        * Send messages
+        * Attach embeds
+        * Add reactions
+        * Manage messages
+        * Create channels
+* Invite to actual server
+* Figure out hosting
