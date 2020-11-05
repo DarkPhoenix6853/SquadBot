@@ -1,0 +1,19 @@
+{
+  "name": "squadbot",
+  "version": "1.0.0",
+  "description": "",
+  "main": "SquadBot.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DarkPhoenix6853/SquadBot.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/DarkPhoenix6853/SquadBot/issues"
+  },
+  "homepage": "https://github.com/DarkPhoenix6853/SquadBot#readme"
+}
