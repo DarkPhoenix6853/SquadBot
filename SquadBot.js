@@ -35,9 +35,11 @@ client.on('message', async message => {
   //commands only below here
   if (!message.content.startsWith(prefix)) return;
 
+  //split the message into command + arguments
   const args = message.content.slice(prefix.length).trim().split(/ +/g);
   const command = args.shift().toLowerCase();
 
+  //get permissions of the current user
   let perms = {
     dev: false,
     admin: false,
@@ -51,11 +53,12 @@ client.on('message', async message => {
   if (roles.has(client.config.get('permsConfig').admin)) perms.admin = true; perms.trusted = true;
   if (roles.has(client.config.get('permsConfig').trusted)) perms.trusted = true;
 
+  //finally, execute the command
   executeCommand(client, message, command, args, perms);
-  
 });
 
 function executeCommand(client, message, command, args, perms) {
+  //check if the bot is awake
   if (command === 'ping') {
     message.reply('Pong!');
   }
@@ -77,6 +80,7 @@ function executeCommand(client, message, command, args, perms) {
   }
 }
 
+//Displays a donation message for how to support the creator
 function donations(message) {
   let name = "DarkPhoenix6853";
   if (message.guild.members.cache.has('198269661320577024')) name = "<@198269661320577024>";
@@ -92,6 +96,7 @@ function donations(message) {
   message.channel.send(embed);
 }
 
+//Shows a message about who made the bot
 async function credit (client, message) {
   let baseConfig = await client.config.get('baseConfig');
   let name = "DarkPhoenix6853";
@@ -106,6 +111,7 @@ async function credit (client, message) {
   message.channel.send(embed);
 }
 
+//shuts down the bot. If using PM2 or other process manager the bot should restart. 
 function shutdown(message) {
   message.channel.send("Shutting down");
   console.log(`Killed by: ${message.author.tag}`);
@@ -114,22 +120,31 @@ function shutdown(message) {
   }), 1000);
 }
 
+//sets a new command prefix
 async function setPrefix(client, args, message) {
+  //make sure we're actually changing to something
   if (args.length < 1) return;
+
+  //get the new prefix
   const newPrefix = args[0];
 
   const fs = require('fs');
 
+  //get the current config
   let baseConfig = await client.config.get('baseConfig');
 
+  //edit it
   baseConfig.prefix = newPrefix;
 
+  //save it
   await client.config.set('baseConfig', baseConfig)
 
+  //also save it in the config file
   fs.writeFile("./config/baseConfig.json", JSON.stringify(baseConfig,null,4), (err) => console.error);
 
   message.reply(`Setting prefix to ${newPrefix}`)
 
+  //update the Presence
   setStatus();
 }
 
@@ -138,6 +153,7 @@ client.login(identityConfig.token)
   setStatus()
 })
 
+//update the bot's Presence
 async function setStatus() {
   let baseConfig = await client.config.get('baseConfig');
 
