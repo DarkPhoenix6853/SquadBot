@@ -8,8 +8,8 @@
     * Save Created timestamp, and whether anyone was in it on the last sweep
 
 ## Periodic
-* approx 12 hours? 
-    * Set presence of bot to say something about the help command
+* ~~approx 12 hours? ~~
+    * ~~Set presence of bot to say something about the help command~~
 * approx 1 hour? 
     * Sweep through squad DB, anything that's too old delete its message and remove entry from DB
 * approx 30 seconds 
@@ -25,6 +25,7 @@
     * Args: (optional) starting capacity, message
     * Default starting capacity to 1 (host)
     * Creates an embed 
+        * Get colour from own role colour
         * Title: Open Squad - (Host name)
         * content includes initial player count (if > 1) and message
     * Adds the first reactions
@@ -41,9 +42,9 @@
     * Reaction uses
     * If trusted, add voice channel creation command
 
-* Donation command
+* ~~Donations command~~
 
-* Credit command
+* ~~Credit command~~
 
 ## Events
 * Reaction event

@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/DarkPhoenix6853/SquadBot#readme",
   "dependencies": {
+    "cron": "^1.8.2",
     "discord.js": "^12.4.1",
     "enmap": "^5.8.0"
   },
