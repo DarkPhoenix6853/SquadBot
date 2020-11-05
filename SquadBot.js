@@ -1,5 +1,11 @@
 const Discord = require('discord.js');
 const client = new Discord.Client();
+const Enmap = require("enmap");
+
+const identity = require("./config/ignore/identity.json");
+
+client.config = new Enmap();
+client.config.set('identity', identity);
 
 client.on('ready', () => {
   console.log(`Logged in as ${client.user.tag}!`);
@@ -11,4 +17,4 @@ client.on('message', msg => {
   }
 });
 
-client.login('NTU0NTgzMTc1MzYwMTUxNTUz.XIYd1A.myCI5vTumYzA8Y8wni5Te7NWTBI');
+client.login(identity.token);
