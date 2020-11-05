@@ -15,5 +15,9 @@
   "bugs": {
     "url": "https://github.com/DarkPhoenix6853/SquadBot/issues"
   },
-  "homepage": "https://github.com/DarkPhoenix6853/SquadBot#readme"
+  "homepage": "https://github.com/DarkPhoenix6853/SquadBot#readme",
+  "dependencies": {
+    "discord.js": "^12.4.1"
+  },
+  "devDependencies": {}
 }
