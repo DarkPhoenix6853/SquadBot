@@ -12,11 +12,22 @@ client.config.set('identity', identityConfig);
 client.config.set('baseConfig', baseConfig);
 client.config.set('permsConfig', permsConfig);
 
+const squadDB = new Enmap({ name: 'squadDB' });
+const voiceDB = new Enmap({ name: 'voiceDB' });
+
 let recurringStatus = new cron.CronJob('00 00 00,12 * * *', setStatus);
 recurringStatus.start();
 
-client.on('ready', () => {
+client.on('ready', async () => {
   console.log(`Logged in as ${client.user.tag}!`);
+
+  await squadDB.defer;
+  console.log(`\nLoaded ${squadDB.size} squads from database`);
+  client.squadDB = squadDB;
+
+  await voiceDB.defer;
+  console.log(`\nLoaded ${voiceDB.size} voice channels from database`);
+  client.voiceDB = voiceDB;
 });
 
 client.on('message', async message => {
@@ -78,6 +89,116 @@ function executeCommand(client, message, command, args, perms) {
   if (command === 'donations') {
     donations(message);
   }
+
+  if (command === 'host' || command === 'h') {
+    host(client, message, args);
+  }
+
+  if (command === 'dumpdb' && perms.dev) {
+    dumpdb(message, client);
+  }
+
+  if (command === 'purgedb' && perms.dev) {
+    purgedb(message, client);
+  }
+}
+
+//wipe all databases
+function purgedb(message, client) {
+  client.squadDB.deleteAll();
+  client.voiceDB.deleteAll();
+  
+  message.channel.send("Database purged");
+  console.log(`Database purged by ${message.author.username}`);
+}
+
+//save databases to file for analysis
+function dumpdb(message, client) {
+  const fs = require('fs');
+  const date = new Date();
+
+  const timeStamp = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}_${date.getHours()}-${date.getMinutes()}-${date.getSeconds()}`;
+
+  const squadKeys = client.squadDB.indexes;
+  let squadArray = [];
+  for (let key of squadKeys) {
+    let squadObject = {
+      messageID: key,
+      squad: client.squadDB.get(key)
+    }
+    squadArray.push(squadObject);
+  }
+  fs.writeFile(`./dumps/${timeStamp}_SquadDump.json`, JSON.stringify(squadArray,null,4), (err) => console.error);
+
+  const voiceKeys = client.voiceDB.indexes;
+  let voiceArray = [];
+  for (let key of voiceKeys) {
+    let voiceObject = {
+      messageID: key,
+      voice: client.voiceDB.get(key)
+    }
+    voiceArray.push(voiceObject);
+  }
+  fs.writeFile(`./dumps/${timeStamp}_voiceDump.json`, JSON.stringify(voiceArray,null,4), (err) => console.error);
+
+
+  console.log("Database saved to file");
+
+  message.channel.send("Dumped DB to file");
+}
+
+async function host(client, message, args) {
+
+  //get the number of people initially in the squad
+  let initialCount = parseInt(args[0], 10);
+  if (isNaN(initialCount) || initialCount > 3) {
+    initialCount = 1;
+  } else {
+    args.shift();
+  }
+
+  //get the member of the author
+  let authorMember = await message.guild.member(message.author);
+
+  //set the title
+  let title = `Open Squad - ${authorMember.displayName}`;
+
+  //format initial players
+  let addon = "";
+
+  if (initialCount > 1) {
+    addon = `Starting at ${initialCount} players\n`
+  }
+
+  let text = args.join(" ");
+  let content = `${addon}${text}`
+
+  //get the bot's displayed colour
+  const botMember = await message.guild.member(client.user);
+  const myColour = botMember.displayColor;
+
+  //construct the embed
+  let embed = new Discord.MessageEmbed()
+  .setTitle(title)
+  .setColor(myColour)
+  .setDescription(content);
+
+  //send message
+  let sentMessage = await message.channel.send(embed);
+
+  //save relevant info to the DB
+  client.squadDB.set(message.id, {
+    channel: message.channel.id,
+    host: message.author.id,
+    initialCount: initialCount,
+    content: text,
+    createdTime: Date.now()
+  })
+
+  //add reactions
+  await sentMessage.react("✅");
+  await sentMessage.react("❎");
+  await sentMessage.react("⏩");
 }
 
 //Displays a donation message for how to support the creator

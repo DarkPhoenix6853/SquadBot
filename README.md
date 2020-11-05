@@ -1,9 +1,9 @@
 # SquadBot
 ## Design work
-* Design squad DB
+* ~~Design squad DB~~
     * Index by MessageID
     * Save channel, host ID, start cap, content, created time
-* Design voice channel DB
+* ~~Design voice channel DB~~
     * Index by ChannelID
     * Save Created timestamp, and whether anyone was in it on the last sweep
 
@@ -21,15 +21,15 @@
     * If already no, delete channel and remove from DB
 
 ## Commands
-* Command to create a squad
-    * Args: (optional) starting capacity, message
-    * Default starting capacity to 1 (host)
-    * Creates an embed 
-        * Get colour from own role colour
-        * Title: Open Squad - (Host name)
-        * content includes initial player count (if > 1) and message
-    * Adds the first reactions
-    * Index by message ID, save channel, host ID, starting capacity, message content, created time
+* ~~Command to create a squad~~
+    * ~~Args: (optional) starting capacity, message~~
+    * ~~Default starting capacity to 1 (host)~~
+    * ~~Creates an embed~~
+        * ~~Get colour from own role colour~~
+        * ~~Title: Open Squad - (Host name)~~
+        * ~~content includes initial player count(if > 1) and message~~
+    * ~~Adds the first reactions~~
+    * ~~Index by message ID, save channel, host ID, starting capacity, message content, created time~~
 
 * Command to create a voice channel
     * Trusted only
@@ -45,6 +45,10 @@
 * ~~Donations command~~
 
 * ~~Credit command~~
+
+* ~~DumpDB (For debugging)~~
+
+* ~~PurgeDB (For debugging)~~
 
 ## Events
 * Reaction event
