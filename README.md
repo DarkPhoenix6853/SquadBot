@@ -24,8 +24,10 @@
 * Command to create a squad
     * Args: (optional) starting capacity, message
     * Default starting capacity to 1 (host)
-    * Creates an embed with the host name, initial player count and message
-    * Adds the first reaction
+    * Creates an embed 
+        * Title: Open Squad - (Host name)
+        * content includes initial player count (if > 1) and message
+    * Adds the first reactions
     * Index by message ID, save channel, host ID, starting capacity, message content, created time
 
 * Command to create a voice channel
@@ -35,6 +37,9 @@
     * Reply to author with reference to channel
 
 * "Help" or "Guide" command
+    * host command
+    * Reaction uses
+    * If trusted, add voice channel creation command
 
 * Donation command
 
@@ -44,7 +49,7 @@
 * Reaction event
     * Ignore bots
     * Ignore reactions unless they're on our messages
-    * Ignore the message unless it has an embed
+    * Ignore the message unless it has an embed that has a title starting with "Open Squad"
     * If it's the "close" reaction, delete the message
     * If it's the "go" reaction, run FillCheck routine (pass in message object)
     * If "join" react
