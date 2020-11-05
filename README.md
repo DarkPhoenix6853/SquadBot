@@ -10,7 +10,7 @@
 ## Periodic
 * ~~approx 12 hours? ~~
     * ~~Set presence of bot to say something about the help command~~
-* approx 1 hour? 
+* approx 1 hour? ask Wolf
     * Sweep through squad DB, anything that's too old delete its message and remove entry from DB
 * approx 30 seconds 
     * Sweep through VoiceDB
