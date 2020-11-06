@@ -1,26 +1,33 @@
+//packages
 const Discord = require('discord.js');
 const client = new Discord.Client();
 const Enmap = require("enmap");
 const cron = require("cron");
 
+//get configs
 const identityConfig = require("./config/ignore/identity.json");
 const baseConfig = require("./config/baseConfig.json");
 const permsConfig = require("./config/perms.json");
 
+//save configs
 client.config = new Enmap();
 client.config.set('identity', identityConfig);
 client.config.set('baseConfig', baseConfig);
 client.config.set('permsConfig', permsConfig);
 
+//set up DBs
 const squadDB = new Enmap({ name: 'squadDB' });
 const voiceDB = new Enmap({ name: 'voiceDB' });
 
+//set up the status message to refresh every 12 hours
 let recurringStatus = new cron.CronJob('00 00 00,12 * * *', setStatus);
 recurringStatus.start();
 
 client.on('ready', async () => {
+  //show login info
   console.log(`Logged in as ${client.user.tag}!`);
 
+  //set up the databases
   await squadDB.defer;
   console.log(`\nLoaded ${squadDB.size} squads from database`);
   client.squadDB = squadDB;
@@ -29,6 +36,7 @@ client.on('ready', async () => {
   console.log(`\nLoaded ${voiceDB.size} voice channels from database\n`);
   client.voiceDB = voiceDB;
 
+  //confirm launch
   console.log(`${identityConfig.name} online!`)
 });
 
