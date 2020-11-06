@@ -26,8 +26,10 @@ client.on('ready', async () => {
   client.squadDB = squadDB;
 
   await voiceDB.defer;
-  console.log(`\nLoaded ${voiceDB.size} voice channels from database`);
+  console.log(`\nLoaded ${voiceDB.size} voice channels from database\n`);
   client.voiceDB = voiceDB;
+
+  console.log(`${identityConfig.name} online!`)
 });
 
 client.on('message', async message => {
@@ -101,6 +103,86 @@ function executeCommand(client, message, command, args, perms) {
   if (command === 'purgedb' && perms.dev) {
     purgedb(message, client);
   }
+
+  if (command === 'addvoice' && perms.trusted) {
+    addVoice(client, message);
+  }
+
+  if (command === 'help' || command === 'guide') {
+    help(message, perms);
+  }
+}
+
+//display the help message
+function help(message, perms) {
+  let voiceAdd = "";
+
+  if (perms.trusted) {
+    voiceAdd = `**To create a new voice channel** without making a squad, use __++addvoice__`
+  }
+
+  const helpText = `
+Help for SquadBot: 
+**To create a squad**, use __++host__ followed by the message you want to display. 
+e.g. __++host lith survival__
+If you want to start the squad with 2 or 3 people (instead of just yourself), put the number of users before the host message
+e.g. you + 1 friend = __++host 2 k-drive racing__
+
+**To join a squad** just click the ✅ on someone else's host message
+
+**To close one of your squads** click the ❎ on your own host message
+
+**To start playing with less than 4 people**, click the ⏩ on your own squad message
+
+${voiceAdd}`;
+
+  message.channel.send(helpText);
+}
+
+//user creates a new voice channel
+async function addVoice(client, message) {
+  const guild = message.guild;  
+
+  let newChannel = await createVoiceChannel(client, guild);
+
+  message.reply(`Created a new voice channel: ${newChannel.name}`);
+}
+
+//create a new voice channel
+async function createVoiceChannel(client, guild) {
+  let baseConfig = await client.config.get('baseConfig');
+
+  const channelOptions = {
+    type: 'voice',
+    userLimit: 4,
+    parent: baseConfig.voiceCategory
+  }
+
+  let nameID = await getUniqueName(client);
+
+  let newChannel = await guild.channels.create(`Squad Channel ${nameID}`, channelOptions);
+
+  await client.voiceDB.set(newChannel.id, {nameID: nameID, createdTime: Date.now(), occupied: true});
+
+  return newChannel;
+}
+
+async function getUniqueName(client) {
+
+  const voiceKeys = client.voiceDB.indexes;
+  let voiceIDArray = [];
+  for (let key of voiceKeys) {
+    
+    let channel = await client.voiceDB.get(key)
+    
+    voiceIDArray.push(channel.nameID.toString());
+  }
+
+  for (let i = 1; i < 1000; i++) {
+    if (!voiceIDArray.includes(i.toString())) return i.toString();
+  }
+
+  return "Error - how on Earth do you have this many squads at once?"
 }
 
 //wipe all databases
@@ -134,7 +216,7 @@ function dumpdb(message, client) {
   let voiceArray = [];
   for (let key of voiceKeys) {
     let voiceObject = {
-      messageID: key,
+      channelID: key,
       voice: client.voiceDB.get(key)
     }
     voiceArray.push(voiceObject);
@@ -147,6 +229,21 @@ function dumpdb(message, client) {
   message.channel.send("Dumped DB to file");
 }
 
+async function createEmbed(message, client, title, content) {
+  //get the bot's displayed colour
+  const botMember = await message.guild.member(client.user);
+  const myColour = botMember.displayColor;
+
+  //construct the embed
+  let embed = new Discord.MessageEmbed()
+  .setTitle(title)
+  .setColor(myColour)
+  .setDescription(content);
+
+  return embed;
+}
+
+//create a host message
 async function host(client, message, args) {
 
   //get the number of people initially in the squad
@@ -173,15 +270,7 @@ async function host(client, message, args) {
   let text = args.join(" ");
   let content = `${addon}${text}`
 
-  //get the bot's displayed colour
-  const botMember = await message.guild.member(client.user);
-  const myColour = botMember.displayColor;
-
-  //construct the embed
-  let embed = new Discord.MessageEmbed()
-  .setTitle(title)
-  .setColor(myColour)
-  .setDescription(content);
+  let embed = await createEmbed(message, client, title, content);
 
   //send message
   let sentMessage = await message.channel.send(embed);

@@ -32,15 +32,15 @@
     * ~~Index by message ID, save channel, host ID, starting capacity, message content, created time~~
 
 * Command to create a voice channel
-    * Trusted only
-    * Create channel
-    * Add to VoiceDB
-    * Reply to author with reference to channel
+    * ~~Trusted only~~
+    * ~~Create channel~~
+    * ~~Add to VoiceDB~~
+    * ~~Reply to author with reference to channel~~
 
-* "Help" or "Guide" command
-    * host command
-    * Reaction uses
-    * If trusted, add voice channel creation command
+* ~~"Help" or "Guide" command~~
+    * ~~host command~~
+    * ~~Reaction uses~~
+    * ~~If trusted, add voice channel creation command~~
 
 * ~~Donations command~~
 
@@ -80,14 +80,14 @@
     * Remove squad from DB
 
 ## Setup
-* Create the bot application (use on testing server first)
-    * Try to use actual permissions this time
-        * Read messages
-        * Read history
-        * Send messages
-        * Attach embeds
-        * Add reactions
-        * Manage messages
-        * Create channels
-* Invite to actual server
+* ~~Create the bot application (use on testing server first)~~
+    * ~~Try to use actual permissions this time~~
+        * ~~Read messages~~
+        * ~~Read history~~
+        * ~~Send messages~~
+        * ~~Attach embeds~~
+        * ~~Add reactions~~
+        * ~~Manage messages~~
+        * ~~Create channels~~
 * Figure out hosting
+* Invite to actual server
