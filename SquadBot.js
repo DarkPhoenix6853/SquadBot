@@ -117,6 +117,7 @@ function executeCommand(client, message, command, args, perms) {
 function help(message, perms) {
   let voiceAdd = "";
 
+  //if the user has access to it, also tell them about the addvoice command
   if (perms.trusted) {
     voiceAdd = `**To create a new voice channel** without making a squad, use __++addvoice__`
   }
@@ -150,6 +151,7 @@ async function addVoice(client, message) {
 
 //create a new voice channel
 async function createVoiceChannel(client, guild) {
+  //get the config (to figure out what category to put the channels in)
   let baseConfig = await client.config.get('baseConfig');
 
   const channelOptions = {
@@ -158,30 +160,39 @@ async function createVoiceChannel(client, guild) {
     parent: baseConfig.voiceCategory
   }
 
+  //get a unique name
   let nameID = await getUniqueName(client);
 
+  //make the channel
   let newChannel = await guild.channels.create(`Squad Channel ${nameID}`, channelOptions);
 
+  //update the DB
   await client.voiceDB.set(newChannel.id, {nameID: nameID, createdTime: Date.now(), occupied: true});
 
+  //just in case we need it
   return newChannel;
 }
 
+//finds a voice channel name that doesn't exist yet
 async function getUniqueName(client) {
 
+  //get all voice channels we're tracking
   const voiceKeys = client.voiceDB.indexes;
   let voiceIDArray = [];
+  //for all channels
   for (let key of voiceKeys) {
-    
+    //grab the channel info
     let channel = await client.voiceDB.get(key)
-    
+    //save the name IDs
     voiceIDArray.push(channel.nameID.toString());
   }
-
+  //find an ID that's not in use at the moment
   for (let i = 1; i < 1000; i++) {
+    //if not currently used, use that one
     if (!voiceIDArray.includes(i.toString())) return i.toString();
   }
 
+  //if we somehow haven't found a match in 1000 unique IDs
   return "Error - how on Earth do you have this many squads at once?"
 }
 
@@ -229,6 +240,7 @@ function dumpdb(message, client) {
   message.channel.send("Dumped DB to file");
 }
 
+//creates a new embed
 async function createEmbed(message, client, title, content) {
   //get the bot's displayed colour
   const botMember = await message.guild.member(client.user);
