@@ -90,4 +90,9 @@
         * ~~Manage messages~~
         * ~~Create channels~~
 * Figure out hosting
-* Invite to actual server
+* Set up
+    * Invite
+    * Bot should already have its own role - set colour
+    * Get IDs for trusted/admin roles
+    * Prefix
+    * Channels
