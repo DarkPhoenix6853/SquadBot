@@ -23,6 +23,14 @@ const voiceDB = new Enmap({ name: 'voiceDB' });
 let recurringStatus = new cron.CronJob('00 00 00,12 * * *', setStatus);
 recurringStatus.start();
 
+//sweep for inactive voice channels
+let voiceSweeping = new cron.CronJob('00,30 * * * * *', sweepVoice);
+voiceSweeping.start();
+
+//sweep for old squads
+let squadSweeping = new cron.CronJob('15,45 * * * * *', sweepSquads);
+squadSweeping.start();
+
 client.on('ready', async () => {
   //show login info
   console.log(`Logged in as ${client.user.tag}!`);
@@ -296,13 +304,15 @@ async function host(client, message, args) {
   let sentMessage = await message.channel.send(embed);
 
   //save relevant info to the DB
-  client.squadDB.set(message.id, {
-    channel: message.channel.id,
+  client.squadDB.set(sentMessage.id, {
+    channel: sentMessage.channel.id,
     host: message.author.id,
     initialCount: initialCount,
     content: text,
     createdTime: Date.now()
   })
+
+  message.delete();
 
   //add reactions
   await sentMessage.react("✅");
@@ -398,4 +408,86 @@ async function setStatus() {
 
   client.user.setPresence(customStatus)
   .catch(console.error);
+}
+
+function sweepVoice() {
+  if (!client.voiceDB) return;
+
+  let voiceChannels = client.voiceDB.indexes;
+
+  if (!voiceChannels) return;
+
+  for (let channelID of voiceChannels) {
+    let channelInfo = client.voiceDB.get(channelID)
+    
+    if (!channelInfo) {
+      console.log(`Channel info not found for ${channelID}`);
+      return;
+    }
+
+    let channelAge = (Date.now() - channelInfo.createdTime)/1000;
+
+    if (channelAge < 60) return;
+
+    client.channels.fetch(channelID)
+    .then((channel) => {
+      if (!channel) {
+        console.log(`Can't find channel ${channelID}`);
+        //purge from the system
+        client.voiceDB.delete(channelID);
+        return;
+      }
+
+      if (channel.members.size > 0) {
+        //people in the channel
+        //set as occupied
+        channelInfo.occupied = true;
+        client.voiceDB.set(channelID, channelInfo);
+
+      } else if (channelInfo.occupied) {
+        //nobody in the channel, but still set as occupied
+        //set as unoccupied
+        channelInfo.occupied = false;
+        client.voiceDB.set(channelID, channelInfo);
+
+      } else {
+        //nobody in channel, listed as unoccupied
+        //delete it
+        channel.delete()
+        .then(() => {
+          client.voiceDB.delete(channel.id);
+        })
+        .catch((err) => console.log(err))
+      }
+    })
+    .catch(() => { })
+  }
+}
+
+async function sweepSquads() {
+  if (!client.squadDB) return;
+
+  let squads = client.squadDB.indexes;
+
+  if (!squads) return;
+
+  for (let messageID of squads) {
+    let squadInfo = client.squadDB.get(messageID);
+
+    if (!squadInfo) return;
+
+    //minutes
+    let squadAge = (Date.now() - squadInfo.createdTime)/1000/60;
+
+    if (squadAge < 60) return;
+
+    let channel = await client.channels.fetch(squadInfo.channel);
+
+    let message = await channel.messages.fetch(messageID);
+
+    message.delete();
+
+    client.squadDB.delete(messageID);
+
+  }
 }

@@ -10,15 +10,15 @@
 ## Periodic
 * ~~approx 12 hours?~~
     * ~~Set presence of bot to say something about the help command~~
-* approx 1 hour? ask Wolf
-    * Sweep through squad DB, anything that's too old delete its message and remove entry from DB
-* approx 30 seconds 
-    * Sweep through VoiceDB
-    * If a channel is less than a minute old, ignore it
-    * Otherwise see if there are people in it
-    * If not, check if there weren't any on the previous sweep
-    * If yes, set to no
-    * If already no, delete channel and remove from DB
+* ~~approx 1 hour? ask Wolf~~
+    * ~~Sweep through squad DB, anything that's too old delete its message and remove entry from DB~~
+* ~~approx 30 seconds ~~
+    * ~~Sweep through VoiceDB~~
+    * ~~If a channel is less than a minute old, ignore it~~
+    * ~~Otherwise see if there are people in it~~
+    * ~~If not, check if there weren't any on the previous sweep~~
+    * ~~If yes, set to no~~
+    * ~~If already no, delete channel and remove from DB~~
 
 ## Commands
 * ~~Command to create a squad~~
@@ -31,7 +31,7 @@
     * ~~Adds the first reactions~~
     * ~~Index by message ID, save channel, host ID, starting capacity, message content, created time~~
 
-* Command to create a voice channel
+* ~~Command to create a voice channel~~
     * ~~Trusted only~~
     * ~~Create channel~~
     * ~~Add to VoiceDB~~
@@ -55,7 +55,7 @@
     * Ignore bots
     * Ignore reactions unless they're on our messages
     * Ignore the message unless it has an embed that has a title starting with "Open Squad"
-    * If it's the "close" reaction, delete the message
+    * If it's the "close" reaction, delete the message (and wipe from DB)
     * If it's the "go" reaction, run FillCheck routine (pass in message object)
     * If "join" react
         * Ignore host
