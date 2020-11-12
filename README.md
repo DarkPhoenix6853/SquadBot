@@ -1,11 +1,11 @@
 # SquadBot
 ## Design work
 * ~~Design squad DB~~
-    * Index by MessageID
-    * Save channel, host ID, start cap, content, created time
+    * ~~Index by MessageID~~
+    * ~~Save channel, host ID, start cap, content, created time~~
 * ~~Design voice channel DB~~
-    * Index by ChannelID
-    * Save Created timestamp, and whether anyone was in it on the last sweep
+    * ~~Index by ChannelID~~
+    * ~~Save Created timestamp, and whether anyone was in it on the last sweep~~
 
 ## Periodic
 * ~~approx 12 hours?~~
@@ -87,7 +87,7 @@
         * ~~Add reactions~~
         * ~~Manage messages~~
         * ~~Create channels~~
-* Figure out hosting
+* ~~Figure out hosting~~
 * Set up
     * Invite
     * Bot should already have its own role - set colour
