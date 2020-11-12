@@ -158,10 +158,16 @@ function executeCommand(client, message, command, args, perms) {
 //display the help message
 function help(message, perms) {
   let voiceAdd = "";
+  let adminAdd = "";
 
   //if the user has access to it, also tell them about the addvoice command
   if (perms.trusted) {
     voiceAdd = `**To create a new voice channel** without making a squad, use __${baseConfig.prefix}addvoice__`
+  }
+
+  if (perms.admin) {
+    adminAdd = `-----Admin commands-----
+**To change the bot's prefix** use __${baseConfig.prefix}prefix__ followed by the new prefix. This should be reflected in the bot's status.`
   }
 
   const helpText = `
@@ -177,7 +183,9 @@ e.g. you + 1 friend = __${baseConfig.prefix}host 2 k-drive racing__
 
 **To start playing with less than 4 people**, click the ⏩ on your own squad message
 
-${voiceAdd}`;
+${voiceAdd}
+
+${adminAdd}`;
 
   message.channel.send(helpText);
 }
