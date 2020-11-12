@@ -1,6 +1,6 @@
 //packages
 const Discord = require('discord.js');
-const client = new Discord.Client();
+const client = new Discord.Client({ partials: ['MESSAGE', 'REACTION']});
 const Enmap = require("enmap");
 const cron = require("cron");
 
@@ -47,6 +47,32 @@ client.on('ready', async () => {
   //confirm launch
   console.log(`${identityConfig.name} online!`)
 });
+
+client.on('messageReactionAdd', async (reaction, user) => {
+  // When we receive a reaction we check if the reaction is partial or not
+	if (reaction.partial) {
+		// If the message this reaction belongs to was removed the fetching might result in an API error, which we need to handle
+		try {
+			await reaction.fetch();
+		} catch (error) {
+			console.error('Something went wrong when fetching the message: ', error);
+			return;
+		}
+  }
+
+  //ignore bots
+  if (user.bot) return;
+
+  //ignore messages that aren't ours
+  let hostMessages = client.squadDB.indexes;
+  if (!hostMessages.includes(reaction.message.id)) return;
+
+  let squad = client.squadDB.get(reaction.message.id);
+
+  if (reaction.emoji.name == '✅') onJoin(reaction, user, squad, reaction.message.id);
+  if (reaction.emoji.name == '❎') onClose(reaction, user, squad, reaction.message.id);
+  if (reaction.emoji.name == '⏩') onGo(reaction, user, squad, reaction.message.id);
+})
 
 client.on('message', async message => {
 
@@ -490,4 +516,91 @@ async function sweepSquads() {
     client.squadDB.delete(messageID);
 
   }
+}
+
+function onClose(reaction, user, squad, squadID) {
+  //check if this is the host
+  if (user.id !== squad.host) {
+    reaction.users.remove(user);
+    return;
+  }
+  
+  client.squadDB.delete(squadID);
+  reaction.message.delete();
+}
+
+function onJoin(reaction, user, squad, squadID) {
+  //check if this is the host
+  if (user.id === squad.host) {
+    reaction.users.remove(user);
+    return;
+  }
+  const initialCount = squad.initialCount;
+
+  if (reaction.count - 1 + initialCount >= 4) fillCheck(reaction, squad);
+}
+
+async function onGo(reaction, user, squad, squadID) {
+
+  //check if this is the host
+  if (user.id !== squad.host) {
+    reaction.users.remove(user);
+    return;
+  }
+
+  //find the join reaction object
+  let reactions = reaction.message.reactions.cache;
+
+  let joinReaction;
+
+  for (let reaction of reactions) {
+    if (reaction[1].partial) {
+      // If the message this reaction belongs to was removed the fetching might result in an API error, which we need to handle
+      try {
+        await reaction[1].fetch();
+      } catch (error) {
+        console.error('Something went wrong when fetching the message: ', error);
+        return;
+      }
+    }
+
+    if (reaction[0] == '✅') joinReaction = reaction;
+  }
+  
+  fillCheck(joinReaction[1], squad);
+}
+
+function fillCheck(reaction, squad) {
+  //get reacted users
+  let users = reaction.users.cache;
+  let usersClean = [];
+  //add the host first
+  usersClean.push(squad.host);
+
+  for (let user of users) {
+    //filter out bots and the host (if they somehow reacted)
+    if (user[1].bot) continue;
+    if (user[1].id == squad.host) continue;
+    usersClean.push(user[1].id);
+  }
+
+  fill(usersClean, reaction.message, squad);
+}
+
+async function fill (users, message, squad) {
+
+  let mentions = "";
+  for (let user of users) {
+    mentions += `<@${user}>`;
+  }
+
+  let voiceChannel = await createVoiceChannel(client, message.guild);
+
+  let embed = await createEmbed(message, client, "Squad filled", `Squad: ${squad.content}\n\nNew voice channel created: ${voiceChannel.name}`);
+
+  message.channel.send(mentions, embed);
+
+  client.squadDB.delete(message.id);
+
+  message.delete();
 }

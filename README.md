@@ -26,7 +26,6 @@
     * ~~Default starting capacity to 1 (host)~~
     * ~~Creates an embed~~
         * ~~Get colour from own role colour~~
-        * ~~Title: Open Squad - (Host name)~~
         * ~~content includes initial player count(if > 1) and message~~
     * ~~Adds the first reactions~~
     * ~~Index by message ID, save channel, host ID, starting capacity, message content, created time~~
@@ -51,33 +50,32 @@
 * ~~PurgeDB (For debugging)~~
 
 ## Events
-* Reaction event
-    * Ignore bots
-    * Ignore reactions unless they're on our messages
-    * Ignore the message unless it has an embed that has a title starting with "Open Squad"
-    * If it's the "close" reaction, delete the message (and wipe from DB)
-    * If it's the "go" reaction, run FillCheck routine (pass in message object)
-    * If "join" react
-        * Ignore host
-        * Use message ID to get initial squad count
-        * If number of reacts (-1 for bot itself) + starting capacity >= 4
-            * Run FillCheck routine (pass in message object)
+* ~~Reaction event~~
+    * ~~Ignore bots~~
+    * ~~Ignore reactions unless they're on squad messages~~
+    * ~~If it's the "close" reaction, delete the message (and wipe from DB)~~
+    * ~~If it's the "go" reaction, run FillCheck routine (pass in message object)~~
+    * ~~If "join" react~~
+        * ~~Ignore host~~
+        * ~~Use message ID to get initial squad count~~
+        * ~~If number of reacts (-1 for bot itself) + starting capacity >= 4~~
+            * ~~Run FillCheck routine (pass in message object)~~
 
 ## Routines
-* FillCheck
-    * Requires message object
-    * Get reactions
-    * Iterate through them, remove the host and any bots
-    * Run Fill routine (pass in player IDs + host ID,  message object)
+* ~~FillCheck~~
+    * ~~Requires message object~~
+    * ~~Get reactions~~
+    * ~~Iterate through them, remove the host and any bots~~
+    * ~~Run Fill routine (pass in player IDs + host ID,  message object)~~
 
 * Fill
-    * Get channel object (for later sending)
-    * Delete message
-    * Create a new voice channel
-    * Save it to VoiceDB
-    * Format IDs into a ping message with reference to new voice channel
-    * Send message
-    * Remove squad from DB
+    * ~~Get channel object (for later sending)~~
+    * ~~Delete message~~
+    * ~~Create a new voice channel~~
+    * ~~Save it to VoiceDB~~
+    * ~~Format IDs into a ping message with reference to new voice channel~~
+    * ~~Send message~~
+    * ~~Remove squad from DB~~
 
 ## Setup
 * ~~Create the bot application (use on testing server first)~~
