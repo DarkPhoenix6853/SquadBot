@@ -97,17 +97,22 @@ client.on('message', async message => {
   //get permissions of the current user
   let perms = {
     dev: false,
-    admin: false,
-    trusted: false
+    admin: true,
+    trusted: true
   };
 
   let member = await message.guild.member(message.author);
   let roles = await member.roles.cache;
-  
-  if (message.author.id == '198269661320577024') perms.dev = true; perms.admin = true; perms.trusted = true;
-  if (roles.has(client.config.get('permsConfig').admin)) perms.admin = true; perms.trusted = true;
-  if (roles.has(client.config.get('permsConfig').trusted)) perms.trusted = true;
-
+  if (message.author.id == '198269661320577024') {
+    perms.dev = true; 
+    perms.admin = true; 
+    perms.trusted = true;
+  } else if (roles.has(client.config.get('permsConfig').admin)) {
+    perms.admin = true; 
+    perms.trusted = true;
+  } else if (roles.has(client.config.get('permsConfig').trusted)) {
+    perms.trusted = true;
+  }
   //finally, execute the command
   executeCommand(client, message, command, args, perms);
 });
@@ -116,6 +121,7 @@ function executeCommand(client, message, command, args, perms) {
   //check if the bot is awake
   if (command === 'ping') {
     message.reply('Pong!');
+
   }
 
   if (perms.admin && command === 'prefix') {
