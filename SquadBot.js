@@ -162,7 +162,7 @@ function help(message, perms) {
 
   //if the user has access to it, also tell them about the addvoice command
   if (perms.trusted) {
-    voiceAdd = `**To create a new voice channel** without making a squad, use __${baseConfig.prefix}addvoice__`
+    voiceAdd = `-----Trusted Commands-----\n**To create a new voice channel** without making a squad, use __${baseConfig.prefix}addvoice__`
   }
 
   if (perms.admin) {
