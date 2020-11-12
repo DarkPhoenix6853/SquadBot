@@ -161,15 +161,15 @@ function help(message, perms) {
 
   //if the user has access to it, also tell them about the addvoice command
   if (perms.trusted) {
-    voiceAdd = `**To create a new voice channel** without making a squad, use __++addvoice__`
+    voiceAdd = `**To create a new voice channel** without making a squad, use __${baseConfig.prefix}addvoice__`
   }
 
   const helpText = `
 Help for SquadBot: 
-**To create a squad**, use __++host__ followed by the message you want to display. 
-e.g. __++host lith survival__
+**To create a squad**, use __${baseConfig.prefix}host__ followed by the message you want to display. 
+e.g. __${baseConfig.prefix}host lith survival__
 If you want to start the squad with 2 or 3 people (instead of just yourself), put the number of users before the host message
-e.g. you + 1 friend = __++host 2 k-drive racing__
+e.g. you + 1 friend = __${baseConfig.prefix}host 2 k-drive racing__
 
 **To join a squad** just click the ✅ on someone else's host message
 
