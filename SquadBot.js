@@ -1,6 +1,6 @@
 //packages
 const Discord = require('discord.js');
-const client = new Discord.Client({ partials: ['MESSAGE', 'REACTION']});
+const client = new Discord.Client({ fetchAllMembers: true, partials: ['MESSAGE', 'REACTION', 'USER']});
 const Enmap = require("enmap");
 const cron = require("cron");
 
