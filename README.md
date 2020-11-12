@@ -94,3 +94,6 @@
     * Get IDs for trusted/admin roles
     * Prefix
     * Channels
+        * Which channels the bot can see/take commands from
+        * Category for voice channels
+        * Anyone who can use the voice channels needs the connect, speak and voice activity permissions in that category
