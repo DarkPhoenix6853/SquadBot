@@ -108,3 +108,5 @@ ignore/
 dumps/
 
 data/
+
+config/
