@@ -74,6 +74,30 @@ client.on('messageReactionAdd', async (reaction, user) => {
   if (reaction.emoji.name == '⏩') onGo(reaction, user, squad, reaction.message.id);
 })
 
+client.on('messageReactionRemove', async (reaction, user) => {
+  // When we receive a reaction we check if the reaction is partial or not
+	if (reaction.partial) {
+		// If the message this reaction belongs to was removed the fetching might result in an API error, which we need to handle
+		try {
+			await reaction.fetch();
+		} catch (error) {
+			console.error('Something went wrong when fetching the message: ', error);
+			return;
+		}
+  }
+
+  //ignore bots
+  if (user.bot) return;
+
+  //ignore messages that aren't ours
+  let hostMessages = client.squadDB.indexes;
+  if (!hostMessages.includes(reaction.message.id)) return;
+
+  let squad = client.squadDB.get(reaction.message.id);
+
+  if (reaction.emoji.name == '✅') onJoinRemove(reaction, user, squad, reaction.message.id);
+})
+
 client.on('message', async message => {
 
   //ignore bots
@@ -323,12 +347,19 @@ async function createEmbed(message, client, title, content) {
 //create a host message
 async function host(client, message, args) {
 
-  //get the number of people initially in the squad
-  let initialCount = parseInt(args[0], 10);
-  if (isNaN(initialCount) || initialCount > 3) {
+  let possibleSquadCount = args[args.length-1];
+
+  let initialCount = 1;
+
+  if (possibleSquadCount == '1/4') {
     initialCount = 1;
+  } else if (possibleSquadCount == '2/4') {
+    initialCount = 2;
+  } else if (possibleSquadCount == '3/4') {
+    initialCount = 3;
   } else {
-    args.shift();
+    args.push('1/4');
+    initialCount = 1;
   }
 
   //get the member of the author
@@ -337,15 +368,7 @@ async function host(client, message, args) {
   //set the title
   let title = `Open Squad - ${authorMember.displayName}`;
 
-  //format initial players
-  let addon = "";
-
-  if (initialCount > 1) {
-    addon = `Starting at ${initialCount} players\n`
-  }
-
-  let text = args.join(" ");
-  let content = `${addon}${text}`
+  let content = args.join(" ");
 
   let embed = await createEmbed(message, client, title, content);
 
@@ -357,8 +380,9 @@ async function host(client, message, args) {
     channel: sentMessage.channel.id,
     host: message.author.id,
     initialCount: initialCount,
-    content: text,
-    createdTime: Date.now()
+    content: content.substring(0,content.length-4),
+    createdTime: Date.now(),
+    title: title
   })
 
   message.delete();
@@ -390,7 +414,8 @@ async function credit (client, message) {
   let baseConfig = await client.config.get('baseConfig');
   let name = "DarkPhoenix6853";
   if (message.guild.members.cache.has('198269661320577024')) name = "<@198269661320577024>";
-  const text = `This bot was created by ${name}.\nFeel free to DM me with bot ideas, or if you'd like to support my work please check out __${baseConfig.prefix}Donations__`;
+  const text = `This bot was created by ${name}.
+Feel free to DM me with bot ideas, or if you'd like to support my work please check out __${baseConfig.prefix}Donations__`;
 
   let embed = new Discord.MessageEmbed()
   .setTitle("Created by DarkPhoenix6853")
@@ -552,7 +577,7 @@ function onClose(reaction, user, squad, squadID) {
   reaction.message.delete();
 }
 
-function onJoin(reaction, user, squad, squadID) {
+async function onJoin(reaction, user, squad, squadID) {
   //check if this is the host
   if (user.id === squad.host) {
     reaction.users.remove(user);
@@ -561,6 +586,34 @@ function onJoin(reaction, user, squad, squadID) {
   const initialCount = squad.initialCount;
 
   if (reaction.count - 1 + initialCount >= 4) fillCheck(reaction, squad);
+
+  let currentContent = reaction.message.embeds[0].description;
+  let currentCount = currentContent.substring(currentContent.length-3,currentContent.length-2);
+  let currentCountInt = parseInt(currentCount, 10);
+  let newCount = currentCountInt + 1;
+
+  let newContent = currentContent.substring(0, currentContent.length-3).concat(newCount.toString(),
+      currentContent.substring(currentContent.length-2, currentContent.length))
+  
+  let embed = await createEmbed(reaction.message, client, squad.title, newContent);
+
+  await reaction.message.edit(embed);
+}
+
+async function onJoinRemove(reaction, user, squad, squadID) {
+  if (user.id === squad.host) return;
+
+  let currentContent = reaction.message.embeds[0].description;
+  let currentCount = currentContent.substring(currentContent.length-3,currentContent.length-2);
+  let currentCountInt = parseInt(currentCount, 10);
+  let newCount = currentCountInt - 1;
+
+  let newContent = currentContent.substring(0, currentContent.length-3).concat(newCount.toString(),
+      currentContent.substring(currentContent.length-2, currentContent.length))
+  
+  let embed = await createEmbed(reaction.message, client, squad.title, newContent);
+
+  await reaction.message.edit(embed);
 }
 
 async function onGo(reaction, user, squad, squadID) {
