@@ -77,6 +77,13 @@
     * ~~Send message~~
     * ~~Remove squad from DB~~
 
+## Updates
+* specify squad size by using 1/4 etc. at the end
+    * none -> add 1/4 anyway
+    * Edit messages with player count
+    * probably need to change DB to include current count
+* ~~Change name of voice channels using message content or (for addvoice) name~~
+
 ## Setup
 * ~~Create the bot application (use on testing server first)~~
     * ~~Try to use actual permissions this time~~
@@ -90,9 +97,9 @@
 * ~~Figure out hosting~~
 * Set up
     * Invite
-    * Bot should already have its own role - set colour
-    * Get IDs for trusted/admin roles
-    * Prefix
+    * ~~Bot should already have its own role - set colour~~
+    * ~~Get IDs for trusted/admin roles~~
+    * ~~Prefix~~
     * Channels
         * Which channels the bot can see/take commands from
         * Category for voice channels

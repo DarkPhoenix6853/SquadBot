@@ -200,13 +200,18 @@ ${adminAdd}`;
 async function addVoice(client, message) {
   const guild = message.guild;  
 
-  let newChannel = await createVoiceChannel(client, guild);
+  let member = await guild.members.fetch(message.author);
+  let username = "";
+
+  if (member) username = member.displayName;
+
+  let newChannel = await createVoiceChannel(client, guild, `${username}'s squad channel`);
 
   message.reply(`Created a new voice channel: ${newChannel.name}`);
 }
 
 //create a new voice channel
-async function createVoiceChannel(client, guild) {
+async function createVoiceChannel(client, guild, name) {
   //get the config (to figure out what category to put the channels in)
   let baseConfig = await client.config.get('baseConfig');
 
@@ -216,14 +221,18 @@ async function createVoiceChannel(client, guild) {
     parent: baseConfig.voiceCategory
   }
 
-  //get a unique name
-  let nameID = await getUniqueName(client);
+  let channelName = "";
+  if (!name || name == "") {
+    channelName = await getUniqueName(client);
+  } else {
+    channelName = name;
+  }
 
   //make the channel
-  let newChannel = await guild.channels.create(`Squad Channel ${nameID}`, channelOptions);
+  let newChannel = await guild.channels.create(channelName, channelOptions);
 
   //update the DB
-  await client.voiceDB.set(newChannel.id, {nameID: nameID, createdTime: Date.now(), occupied: true});
+  await client.voiceDB.set(newChannel.id, {nameID: channelName, createdTime: Date.now(), occupied: true});
 
   //just in case we need it
   return newChannel;
@@ -608,7 +617,7 @@ async function fill (users, message, squad) {
     mentions += `<@${user}>`;
   }
 
-  let voiceChannel = await createVoiceChannel(client, message.guild);
+  let voiceChannel = await createVoiceChannel(client, message.guild, squad.content);
 
   let embed = await createEmbed(message, client, "Squad filled", `Squad: ${squad.content}\n\nNew voice channel created: ${voiceChannel.name}`);
 
