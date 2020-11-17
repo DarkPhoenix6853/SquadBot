@@ -27,10 +27,6 @@ recurringStatus.start();
 let voiceSweeping = new cron.CronJob('00,30 * * * * *', sweepVoice);
 voiceSweeping.start();
 
-//sweep for old squads
-let squadSweeping = new cron.CronJob('15,45 * * * * *', sweepSquads);
-squadSweeping.start();
-
 client.on('ready', async () => {
   //show login info
   console.log(`Logged in as ${client.user.tag}!`);
@@ -121,8 +117,9 @@ client.on('message', async message => {
   //get permissions of the current user
   let perms = {
     dev: false,
-    admin: true,
-    trusted: true
+    admin: false,
+    mod: false,
+    trusted: false
   };
 
   let member = await message.guild.member(message.author);
@@ -130,9 +127,14 @@ client.on('message', async message => {
   if (message.author.id == '198269661320577024') {
     perms.dev = true; 
     perms.admin = true; 
+    perms.mod = true;
     perms.trusted = true;
   } else if (roles.has(client.config.get('permsConfig').admin)) {
     perms.admin = true; 
+    perms.mod = true;
+    perms.trusted = true;
+  } else if (roles.has(client.config.get('permsConfig').canUseCloseOld)) {
+    perms.mod = true;
     perms.trusted = true;
   } else if (roles.has(client.config.get('permsConfig').trusted)) {
     perms.trusted = true;
@@ -183,12 +185,41 @@ function executeCommand(client, message, command, args, perms) {
   if (command === 'help' || command === 'guide') {
     help(message, perms);
   }
+
+  if (command === 'closeold' && perms.mod) {
+    message.reply(`Clearing squads that are more than ${client.config.get('baseConfig').oldSquadThresholdDays} days old`)
+    sweepSquads();
+  }
+
+  if (command === 'closeall') {
+    closeAll(message);
+  }
+}
+
+async function closeAll(message) {
+  let authorID = message.author.id;
+  let guild = message.guild;
+
+  let allIDs = client.squadDB.indexes;
+
+  for (messageID of allIDs) {
+    let currentSquad = client.squadDB.get(messageID);
+    if (currentSquad.host != authorID) continue;
+    let squadChannel = await guild.channels.cache.get(currentSquad.channel);
+    if (!squadChannel) continue;
+    let squadMessage = await squadChannel.messages.fetch(messageID).catch((err) => {})
+    if (!squadMessage) continue;
+    squadMessage.delete()
+    console.log(currentSquad.content)
+    client.squadDB.delete(messageID);
+  }
 }
 
 //display the help message
 function help(message, perms) {
   let voiceAdd = "";
   let adminAdd = "";
+  let modAdd = "";
 
   //if the user has access to it, also tell them about the addvoice command
   if (perms.trusted) {
@@ -200,9 +231,13 @@ function help(message, perms) {
 **To change the bot's prefix** use __${baseConfig.prefix}prefix__ followed by the new prefix. This should be reflected in the bot's status.`
   }
 
+  if (perms.mod) {
+    modAdd = `**To delete old squad messages**, use __${baseConfig.prefix}closeold__`
+  }
+
   const helpText = `
 Help for SquadBot: 
-**To create a squad**, use __${baseConfig.prefix}host__ followed by the message you want to display. Capacity is optional. 
+**To create a squad** use __${baseConfig.prefix}host__ followed by the message you want to display. Capacity is optional. 
 e.g. __${baseConfig.prefix}host lith survival__ or __${baseConfig.prefix}host lith survival 1/4__
 If you want to start the squad with 2 or 3 people (instead of just yourself), put the number of users at the end of the message
 e.g. you + 1 friend = __${baseConfig.prefix}host k-drive racing 2/4__
@@ -211,9 +246,11 @@ e.g. you + 1 friend = __${baseConfig.prefix}host k-drive racing 2/4__
 
 **To close one of your squads** click the ❎ on your own host message
 
-**To start playing with less than 4 people**, click the ⏩ on your own squad message
+**To start playing with less than 4 people** click the ⏩ on your own squad message
 
 ${voiceAdd}
+
+${modAdd}
 
 ${adminAdd}`;
 
@@ -508,7 +545,8 @@ function sweepVoice() {
       if (!channel) {
         console.log(`Can't find channel ${channelID}`);
         //purge from the system
-        client.voiceDB.delete(channelID);
+        client.voiceDB.delete(channelID)
+        .catch((err) => {})
         return;
       }
 
@@ -534,7 +572,7 @@ function sweepVoice() {
         .catch((err) => console.log(err))
       }
     })
-    .catch(() => { })
+    .catch((err) => {})
   }
 }
 
@@ -553,13 +591,14 @@ async function sweepSquads() {
     //minutes
     let squadAge = (Date.now() - squadInfo.createdTime)/1000/60;
 
-    if (squadAge < 60) return;
+    if (squadAge < client.config.get('baseConfig').oldSquadThresholdDays * 24 * 60 /*days to minutes*/) return;
 
     let channel = await client.channels.fetch(squadInfo.channel);
 
     let message = await channel.messages.fetch(messageID);
 
-    message.delete();
+    message.delete()
+    .catch((err) => {})
 
     client.squadDB.delete(messageID);
 
@@ -574,7 +613,8 @@ function onClose(reaction, user, squad, squadID) {
   }
   
   client.squadDB.delete(squadID);
-  reaction.message.delete();
+  reaction.message.delete()
+  .catch((err) => {})
 }
 
 async function onJoin(reaction, user, squad, squadID) {
@@ -678,5 +718,6 @@ async function fill (users, message, squad) {
 
   client.squadDB.delete(message.id);
 
-  message.delete();
+  message.delete()
+  .catch((err) => {})
 }
