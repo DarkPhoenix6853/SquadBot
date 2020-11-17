@@ -246,6 +246,8 @@ e.g. you + 1 friend = __${baseConfig.prefix}host k-drive racing 2/4__
 
 **To close one of your squads** click the ❎ on your own host message
 
+**To close ALL of your squads** type __${baseConfig.prefix}closeall__
+
 **To start playing with less than 4 people** click the ⏩ on your own squad message
 
 ${voiceAdd}
